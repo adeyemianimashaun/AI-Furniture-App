@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:furniture/authentification/au.dart';
-
+import 'package:furniture/screens/onboardingscreen.dart';
 
 class LoginSignupPage extends StatefulWidget {
   const LoginSignupPage({super.key});
@@ -19,6 +19,15 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
+    super.dispose();
+  }
 
   // LOGIN / REGISTER FUNCTION
   Future<void> handleAuth() async {
@@ -67,15 +76,26 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isLogin ? "Login Successful" : "Registration Successful",
+            isLogin
+                ? "Login Successful"
+                : "Registration Successful",
           ),
+        ),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const OnboardingScreen(),
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isLogin ? "Login Failed" : "Registration Failed",
+            isLogin
+                ? "Login Failed"
+                : "Registration Failed",
           ),
         ),
       );
@@ -88,7 +108,10 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 20,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
