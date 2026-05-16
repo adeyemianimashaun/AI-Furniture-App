@@ -8,13 +8,13 @@ class Favorites extends StatelessWidget {
   
   Favorites({super.key});
 
-  final List< List<ProductModel>> items = [
-    sofa,
-    chair,
-    table,
-    bed,
-    lamp
-  ];
+  // final List< List<ProductModel>> items = [
+  //   sofa,
+  //   chair,
+  //   table,
+  //   bed,
+  //   lamp
+  // ];
     
 
   @override

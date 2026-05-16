@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:furniture/data/catitems.dart';
 import 'package:furniture/screens/sub_categoryscreen.dart';
-import 'package:furniture/data/categorygriddata.dart';
 
 class CategoriesPage extends StatelessWidget {
   CategoriesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final List<List<Categoriesgrid>> categories = [
-      sofa,
-      chair,
-      table,
-      bed,
-      lamp,
-    ];
+   final List<String> categories = [
+  "sofa",
+  "chair",
+  "table",
+  "bed",
+  "lamp",
+];
 
     return Scaffold(
       appBar: AppBar(
@@ -32,11 +31,14 @@ class CategoriesPage extends StatelessWidget {
         ),
         itemBuilder: (context, index) {
           final catitem = categoryitems[index];
-          final itemCount = categories[index].length;
+          final categoryName = categories[index];
 
           return GestureDetector(
 
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context)=>sub_CategoryScreen(items: categories[index],title: catitem.name))),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context)=>sub_CategoryScreen(
+  title: catitem.name,
+  category: categoryName,
+))),
             child: Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -78,7 +80,7 @@ class CategoriesPage extends StatelessWidget {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            "$itemCount items",
+                          "ViewProducts",
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.black54,

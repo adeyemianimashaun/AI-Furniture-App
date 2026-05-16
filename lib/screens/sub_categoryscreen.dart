@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:furniture/data/categorygriddata.dart';
+//import 'package:furniture/data/categorygriddata.dart';
 import 'package:furniture/data/productdata.dart';
 import 'package:furniture/provider/favoriteprovider.dart';
 import 'package:furniture/screens/productdetailsscreen.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class sub_CategoryScreen extends StatefulWidget {
   final String title;
-  final List<Categoriesgrid> items;
+ final String category;
 
   sub_CategoryScreen({
     super.key,
     required this.title,
-    required this.items,
+    required this.category,
   });
 
   @override
@@ -43,41 +44,84 @@ class _sub_CategoryScreenState extends State<sub_CategoryScreen> {
       ),
 
       body: Padding(
-        padding:  EdgeInsets.all(16),
-        child: ListView.builder(
-          itemCount: widget.items.length,
-          itemBuilder: (context, index) {
-            final item = widget.items[index];
+  padding: const EdgeInsets.all(16),
+  child: StreamBuilder(
+    stream: FirebaseFirestore.instance
+        .collection('products')
+        .where('category', isEqualTo: widget.category)
+        .snapshots(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState ==
+          ConnectionState.waiting) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }
 
-            return GestureDetector(
+      if (!snapshot.hasData ||
+          snapshot.data!.docs.isEmpty) {
+        return const Center(
+          child: Text("No products found"),
+        );
+      }
 
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ProductDetailsPage(product: ProductModel(name: item.name, image: item.image, price: item.price, rating: item.rating, description: item.description,quantity: item.quantity)))),
-              child: ListTile(
-                leading: Image.asset(
-                  item.image,
-                  width: 80,
-                  fit: BoxFit.cover,
+      final docs = snapshot.data!.docs;
+
+      return ListView.builder(
+        itemCount: docs.length,
+        itemBuilder: (context, index) {
+          final item = docs[index];
+
+          final product = ProductModel(
+  name: item['name'],
+  image: item['image'],
+  price: (item['price']).toDouble(),
+  rating: item['rating'],
+  description: item['description'],
+  quantity: 1,
+);
+
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProductDetailsPage(
+                    product: product,
+                  ),
                 ),
-                title: Text(item.name),
-                subtitle: Text("\$${item.price}"),
-                trailing:  IconButton(onPressed: (){
-                  prov.fav(
-                    ProductModel(name: item.name, image: item.image, price: item.price, rating: item.rating, description: item.description,quantity: item.quantity)
-                  );
-                }, icon:Icon(
-                      prov.isfav(ProductModel(name: item.name, image: item.image, price: item.price, rating: item.rating, description: item.description,quantity: item.quantity))
-                          ? Icons.favorite
-                          : Icons.favorite_border,
-                      color: prov.isfav(ProductModel(name: item.name, image: item.image, price: item.price, rating: item.rating, description: item.description,quantity: item.quantity))
-                          ? Colors.red
-                          : Colors.grey,
-                    ),
+              );
+            },
+            child: ListTile(
+              leading: Image.asset(
+  item['image'],
+  width: 80,
+  fit: BoxFit.cover,
+),
+              title: Text(item['name']),
+              subtitle: Text(
+                "\$${item['price']}",
               ),
-            )
-            );
-          },
-        ),
-      ),
+              trailing: IconButton(
+                onPressed: () {
+                  prov.fav(product);
+                },
+                icon: Icon(
+                  prov.isfav(product)
+                      ? Icons.favorite
+                      : Icons.favorite_border,
+                  color: prov.isfav(product)
+                      ? Colors.red
+                      : Colors.grey,
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    },
+  ),
+)
     );
   }
 }

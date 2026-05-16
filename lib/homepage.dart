@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:furniture/homescreen.dart';
+import 'package:furniture/screens/homescreen.dart';
 import 'package:furniture/screens/categoriesscreen.dart';
 import 'package:furniture/screens/favorites.dart';
 import 'package:furniture/screens/profilescreen.dart';

@@ -6,8 +6,9 @@ import 'package:furniture/provider/cartprovider.dart';
 import 'package:furniture/screens/cartscreen.dart';
 import 'package:furniture/screens/categoriesscreen.dart';
 import 'package:furniture/screens/productdetailsscreen.dart';
+import 'package:furniture/services/firestore_service.dart';
 
-import 'package:furniture/widgets/bestselling.dart';
+//import 'package:furniture/widgets/bestselling.dart';
 import 'package:furniture/widgets/catwidget.dart';
 import 'package:furniture/widgets/productcard.dart';
 import 'package:provider/provider.dart';
@@ -212,86 +213,73 @@ int selectedindex=0;
                     ],
                   ),
                   SizedBox(height:3),
+
+
                   //LISTVIEW FOR CATEGORIES
+                  
                   SizedBox(
-                    height:120,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount:categoryitems.length,
-                      itemBuilder: (context,index){
-                        final catitem=categoryitems[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(right:9),
-                          child: categoryItem(image: catitem.image, title: catitem.name),
-                        );
-                      }),
-                  ),
-              
-                  //BESTSELLING AND VIEWALL
-              
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextButton(onPressed: (){}, child: Text('Bestselling',
-                      style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),)),
-                      TextButton(onPressed: (){}, child: Text('viewall',
-                      style: TextStyle(
-                            fontSize: 12,
-                            color: Color(0xff4CAF50),
-                            fontWeight: FontWeight.bold,
-                          ),)),
-                    ],
-                  ),
-                  //LISTVIEW FOR PRODUCTS
-                  SizedBox(
-                    height:340,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount:bestsellers.length,
-                      itemBuilder: (context,index){
-                        final bestseller=bestsellers[index];
-                        return Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ProductDetailsPage(
-            product: ProductModel(
-              name: bestseller.name,
-              image: bestseller.image,
-              price: bestseller.price,
-              rating: bestseller.rating,
-              description: bestseller.description,
-              quantity: 1,
-            ),
-                          )));},
-                            
-                            
-                            child: Productcard(image: bestseller.image, title: bestseller.name, price: bestseller.price.toString(), 
-                            rating: bestseller.rating, reviews: bestseller.reviews,product:  ProductModel(
-              name: bestseller.name,
-              image: bestseller.image,
-              price: bestseller.price,
-              rating: bestseller.rating,
-              description: bestseller.description,
-              quantity: 1,
+  height: 340,
+  child: StreamBuilder(
+    stream: FirestoreService().getProducts(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      }
+
+      if (!snapshot.hasData) {
+        return Center(
+          child: Text("No products found"),
+        );
+      }
+
+      final docs = snapshot.data!.docs;
+
+      return ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: docs.length,
+        itemBuilder: (context, index) {
+          final data = docs[index];
+
+          return GestureDetector(
+            onTap: () =>Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ProductDetailsPage(product: 
+            ProductModel(
+                  name: data['name'],
+                  image: data['image'],
+                  price: (data['price']).toDouble(),
+                  rating: data['rating'],
+                  description: data['description'],
+                  quantity: 1,
+                ),
+
             ))),
-                        );
-                      }),
-                  ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Productcard(
+                product: ProductModel(
+                  name: data['name'],
+                  image: data['image'],
+                  price: (data['price']).toDouble(),
+                  rating: data['rating'],
+                  description: data['description'],
+                  quantity: 1,
+                ),
+                image: data['image'],
+                title: data['name'],
+                price: "\$${data['price']}",
+                rating: data['rating'],
+                reviews: "2",
+              ),
+            ),
+          );
+        },
+      );
+    },
+  ),
+)
               
-              
-              
-              
-              
-              
-              
-              
-              
-              
-              
+      
               
                   //END OF APP
                 ],
